@@ -62,7 +62,7 @@ Release 签名通过环境变量配置（见 `.github/workflows/release.yml`）�
 ## 快速开始
 
 1. 在 Android Studio 中打开 `minimal-probe-android`。
-2. 使用 JDK 17 和 Android SDK 36。
+2. 使用 JDK 17、Gradle 9.3.1 和 Android SDK 36。
 3. 执行：
 
 ```bash

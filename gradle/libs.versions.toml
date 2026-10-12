@@ -93,7 +93,6 @@ biometric = { group = "androidx.biometric", name = "biometric", version.ref = "b
 datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastorePreferences" }
 
 # Testing
-junit = "4.13.2"
 junit4 = { group = "junit", name = "junit", version = "4.13.2" }
 
 [plugins]
