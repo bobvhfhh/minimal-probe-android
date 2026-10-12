@@ -2,7 +2,6 @@ package com.minprobe.app
 
 import android.os.Build
 import android.os.Bundle
-import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -56,7 +55,7 @@ import org.koin.android.ext.android.inject
  * 主入口。
  *
  * 安全加固（来自代码审查）：
- * - FLAG_SECURE：禁止截屏/录屏，防止面板密码与节点数据泄露
+ * - 本地加密保存密码和 session
  * - 生物识别锁 fail-closed：启用后若设备生物识别不可用，不再静默放行，
  *   而是显示锁定页（用户到系统设置录入后可重试）
  */
@@ -68,11 +67,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        // 审查修复：敏感页面禁止截屏录屏
-        window.setFlags(
-            WindowManager.LayoutParams.FLAG_SECURE,
-            WindowManager.LayoutParams.FLAG_SECURE
-        )
 
         setContent {
             val prefs by prefsRepo.preferencesFlow.collectAsState(initial = UserPreferences())

@@ -88,7 +88,13 @@ val appModule = module {
     single<ServerRepository> { ServerRepositoryImpl(get(), get(), get(), get()) }
     single<NodeRepository> { NodeRepositoryImpl(get(), get()) }
 
-    single { ConfigBackupManager(androidContext(), get(), get()) }
+    single {
+        ConfigBackupManager(
+            androidContext(),
+            get(),
+            Json { prettyPrint = true; ignoreUnknownKeys = true }
+        )
+    }
 
     // ScreenModels
     factory { com.minprobe.app.ui.screen.server.ServerViewModel(get(), get()) }
