@@ -54,8 +54,14 @@ fun NodeCard(node: Node, onClick: () -> Unit) {
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    node.country.ifBlank { "•" }.uppercase(Locale.US),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(end = 8.dp)
+                )
                 Text(
                     node.name,
                     style = MaterialTheme.typography.titleMedium,
@@ -102,23 +108,15 @@ fun NodeCard(node: Node, onClick: () -> Unit) {
             }
 
             Spacer(Modifier.height(7.dp))
-            MetricBar(
-                label = stringResource(R.string.metric_cpu),
-                valueText = String.format(Locale.US, "%.1f%%", metrics.cpu),
-                fraction = (metrics.cpu / 100).toFloat().coerceIn(0f, 1f)
-            )
-            Spacer(Modifier.height(5.dp))
-            MetricBar(
-                label = stringResource(R.string.metric_mem),
-                valueText = "${formatBytes(metrics.memUsed)} / ${formatBytes(metrics.memTotal)}",
-                fraction = node.memPercent.toFloat() / 100
-            )
-            Spacer(Modifier.height(5.dp))
-            MetricBar(
-                label = stringResource(R.string.metric_disk),
-                valueText = "${formatBytes(metrics.diskUsed)} / ${formatBytes(metrics.diskTotal)}",
-                fraction = node.diskPercent.toFloat() / 100
-            )
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+                CompactMetric(stringResource(R.string.metric_cpu), String.format(Locale.US, "%.1f%%", metrics.cpu), (metrics.cpu / 100).toFloat(), Modifier.weight(1f))
+                CompactMetric(stringResource(R.string.metric_mem), "${node.memPercent.toInt()}%", (node.memPercent / 100).toFloat(), Modifier.weight(1f))
+            }
+            Spacer(Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+                CompactMetric(stringResource(R.string.metric_disk), "${node.diskPercent.toInt()}%", (node.diskPercent / 100).toFloat(), Modifier.weight(1f))
+                CompactMetric(stringResource(R.string.metric_load), String.format(Locale.US, "%.2f", metrics.load1), (metrics.load1 / 4).toFloat(), Modifier.weight(1f))
+            }
             Spacer(Modifier.height(7.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -141,6 +139,11 @@ fun NodeCard(node: Node, onClick: () -> Unit) {
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+            }
+            Spacer(Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+                Text("TCP ${metrics.tcp} · UDP ${metrics.udp}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(if (node.expiresIn != null) "${node.expiresIn}天" else "—", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
             }
         }
     }
@@ -185,30 +188,27 @@ private fun StatusBadge(online: Boolean) {
 }
 
 @Composable
-private fun MetricBar(label: String, valueText: String, fraction: Float) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+private fun CompactMetric(label: String, valueText: String, fraction: Float, modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
         Text(
             label,
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.width(44.dp)
         )
+        Spacer(Modifier.height(3.dp))
         LinearProgressIndicator(
             progress = { fraction.coerceIn(0f, 1f) },
             color = MaterialTheme.colorScheme.primary,
             trackColor = MaterialTheme.colorScheme.surfaceVariant,
-            modifier = Modifier
-                .weight(1f)
-                .height(5.dp)
-                .clip(MaterialTheme.shapes.small)
+            modifier = Modifier.fillMaxWidth().height(5.dp).clip(MaterialTheme.shapes.small)
         )
-        Spacer(Modifier.width(8.dp))
         Text(
             valueText,
             style = MaterialTheme.typography.labelMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.widthIn(max = 140.dp)
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(top = 3.dp)
         )
     }
 }

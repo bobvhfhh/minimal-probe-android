@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.background
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.koinScreenModel
@@ -78,6 +80,7 @@ class ThemeSettingsScreen : Screen {
                 )
                 ThemeColor.entries.forEach { theme ->
                     OptionRow(
+                        color = theme.seed,
                         selected = prefs.themeColorKey == theme.key,
                         label = themeLabel(theme),
                         onClick = {
@@ -157,7 +160,7 @@ private fun themeLabel(theme: ThemeColor): String {
 }
 
 @Composable
-private fun OptionRow(selected: Boolean, label: String, onClick: () -> Unit) {
+private fun OptionRow(selected: Boolean, label: String, color: androidx.compose.ui.graphics.Color? = null, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -166,6 +169,10 @@ private fun OptionRow(selected: Boolean, label: String, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         RadioButton(selected = selected, onClick = onClick)
+        color?.let {
+            Spacer(Modifier.size(12.dp).background(it, MaterialTheme.shapes.small))
+            Spacer(Modifier.size(4.dp))
+        }
         Text(label, style = MaterialTheme.typography.bodyLarge)
     }
 }
