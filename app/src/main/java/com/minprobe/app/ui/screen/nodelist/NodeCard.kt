@@ -27,9 +27,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
 import com.minprobe.app.R
 import com.minprobe.app.domain.model.Node
+import com.minprobe.app.domain.model.PingHistory
+import com.minprobe.app.domain.model.PingPoint
+import com.minprobe.app.domain.model.PingTask
 import com.minprobe.app.ui.screen.formatAgo
 import com.minprobe.app.ui.screen.formatBytes
 import com.minprobe.app.ui.screen.formatSpeed
+import com.minprobe.app.ui.screen.ping.PingHealth
+import com.minprobe.app.ui.screen.ping.formatPacketLoss
+import com.minprobe.app.ui.screen.ping.formatPingLatency
+import com.minprobe.app.ui.screen.ping.pingHealth
+import com.minprobe.app.ui.screen.ping.summarizePingTasks
 import java.util.Locale
 
 internal fun nodeMetadataLine(country: String, group: String, os: String): String =
@@ -39,7 +47,12 @@ internal fun nodeAgentBadge(version: String): String = version.trim().removePref
     .takeIf { it.isNotBlank() }?.let { "V$it" } ?: ""
 
 @Composable
-fun NodeCard(node: Node, onClick: () -> Unit) {
+fun NodeCard(
+    node: Node,
+    pingTasks: List<PingTask> = emptyList(),
+    pingHistory: PingHistory? = null,
+    onClick: () -> Unit
+) {
     val context = androidx.compose.ui.platform.LocalContext.current
     Card(
         modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
@@ -78,6 +91,19 @@ fun NodeCard(node: Node, onClick: () -> Unit) {
                 Spacer(Modifier.height(12.dp))
                 SegmentMeter("流量用量", "${formatBytes((node.trafficLimit - node.monthUsed).coerceAtLeast(0))} 剩余 · ${formatBytes(node.monthUsed)} / ${formatBytes(node.trafficLimit)}", node.monthUsed.toFloat() / node.trafficLimit)
             }
+            val pingSummaries = summarizePingTasks(pingTasks, node.id, pingHistory ?: PingHistory())
+            if (pingHistory != null || pingSummaries.isNotEmpty()) {
+                Spacer(Modifier.height(13.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = .45f))
+                Spacer(Modifier.height(10.dp))
+                Text("TCP 延迟", style = MaterialTheme.typography.labelLarge)
+                Spacer(Modifier.height(8.dp))
+                pingSummaries.forEach { summary ->
+                    val samples = (pingHistory?.points ?: emptyList()).filter { it.taskId == summary.taskId }.takeLast(18)
+                    PingStatusRow(summary.name, summary.latestLatencyMs, summary.totalLossPercent, summary.hasSamples, samples)
+                    Spacer(Modifier.height(8.dp))
+                }
+            }
             Spacer(Modifier.height(13.dp))
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = .45f))
             Spacer(Modifier.height(10.dp))
@@ -88,6 +114,60 @@ fun NodeCard(node: Node, onClick: () -> Unit) {
             }
         }
     }
+}
+
+@Composable
+private fun PingStatusRow(
+    name: String,
+    latencyMs: Long?,
+    lossPercent: Double,
+    hasSamples: Boolean,
+    samples: List<PingPoint>
+) {
+    val health = pingHealth(latencyMs, lossPercent)
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Text(name, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+        Text(
+            if (hasSamples) formatPingLatency(latencyMs) else "等待采样",
+            style = MaterialTheme.typography.labelMedium,
+            color = if (hasSamples) health.toPingColor() else MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.width(10.dp))
+        Text(
+            if (hasSamples) formatPacketLoss(lossPercent) else "—",
+            style = MaterialTheme.typography.labelMedium,
+            color = if (hasSamples) health.toPingColor() else MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+    Spacer(Modifier.height(5.dp))
+    PingSegments(samples)
+}
+
+@Composable
+private fun PingSegments(samples: List<PingPoint>) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+        repeat(18) { index ->
+            val sample = samples.getOrNull(index)
+            val color = when (sample?.let { pingHealth(it.latencyMs, it.lossPercent) }) {
+                PingHealth.HEALTHY -> Color(0xFF35C878)
+                PingHealth.WARNING -> Color(0xFFF2B84B)
+                PingHealth.ERROR -> Color(0xFFE24B4B)
+                null -> MaterialTheme.colorScheme.surfaceVariant
+            }
+            Surface(
+                modifier = Modifier.weight(1f).height(7.dp),
+                shape = MaterialTheme.shapes.extraSmall,
+                color = color
+            ) {}
+        }
+    }
+}
+
+@Composable
+private fun PingHealth.toPingColor(): Color = when (this) {
+    PingHealth.HEALTHY -> Color(0xFF23B66F)
+    PingHealth.WARNING -> Color(0xFFE2A52C)
+    PingHealth.ERROR -> MaterialTheme.colorScheme.error
 }
 
 @Composable private fun NodeHeader(node: Node) {

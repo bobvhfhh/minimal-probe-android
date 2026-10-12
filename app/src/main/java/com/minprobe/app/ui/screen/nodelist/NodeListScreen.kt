@@ -183,7 +183,11 @@ class NodeListScreen : Screen {
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
                                 items(filteredNodes, key = { it.id }) { node ->
-                                    NodeCard(node = node) {
+                                    NodeCard(
+                                        node = node,
+                                        pingTasks = state.pingTasks,
+                                        pingHistory = state.pingHistories[node.id]
+                                    ) {
                                         viewModel.onEvent(
                                             NodeListContract.Event.NodeClicked(node.id)
                                         )

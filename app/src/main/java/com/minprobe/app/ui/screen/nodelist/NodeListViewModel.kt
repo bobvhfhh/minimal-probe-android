@@ -5,16 +5,22 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import com.minprobe.app.R
 import com.minprobe.app.domain.model.AuthType
 import com.minprobe.app.domain.model.Node
+import com.minprobe.app.domain.model.PingHistory
 import com.minprobe.app.domain.model.ServerInstance
 import com.minprobe.app.domain.repository.NodeRepository
 import com.minprobe.app.domain.repository.ServerRepository
 import com.minprobe.app.domain.repository.SessionExpiredException
 import com.minprobe.app.mvi.MviViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 
 /** 节点列表：HTTP 首屏 + WebSocket 实时推送（hub 每 2s 推全量帧） */
 class NodeListViewModel(
@@ -26,6 +32,7 @@ class NodeListViewModel(
 ) {
 
     private var wsJob: Job? = null
+    private var pingJob: Job? = null
     private var isScreenStarted = false
     private var activeServer: ServerInstance? = null
     private var sessionCookie: String? = null
@@ -80,6 +87,7 @@ class NodeListViewModel(
                 )
                 updateNodesState(nodes)
                 setState { copy(isLoading = false) }
+                loadPingData(nodes)
 
                 if (isScreenStarted) startStreaming()
             } catch (e: Exception) {
@@ -99,6 +107,7 @@ class NodeListViewModel(
                 )
                 updateNodesState(nodes)
                 setState { copy(isRefreshing = false, error = null) }
+                loadPingData(nodes)
             } catch (e: Exception) {
                 setState { copy(isRefreshing = false) }
                 handleError(e, initial = false)
@@ -144,6 +153,37 @@ class NodeListViewModel(
                 onlineCount = online,
                 offlineCount = nodes.size - online
             )
+        }
+    }
+
+    /**
+     * 列表上的延迟来自 Hub 的历史接口。一次最多 4 个请求，匹配服务端
+     * HISTORY_GATE，避免 13+ 个节点同时刷新时把服务端历史查询队列打满。
+     */
+    private fun loadPingData(nodes: List<Node>) {
+        val server = activeServer ?: return
+        pingJob?.cancel()
+        pingJob = screenModelScope.launch {
+            val cookie = sessionCookie ?: return@launch
+            val tasks = if (server.authType == AuthType.PASSWORD) {
+                runCatching { nodeRepository.getPingTasks(server.baseUrl, cookie) }.getOrDefault(emptyList())
+            } else {
+                emptyList()
+            }
+            val gate = Semaphore(4)
+            val histories = coroutineScope {
+                nodes.filter { it.online }.map { node ->
+                    async {
+                        val history = runCatching {
+                            gate.withPermit {
+                                nodeRepository.getPingHistory(server.baseUrl, cookie, server.authType, node.id, hours = 1)
+                            }
+                        }.getOrDefault(PingHistory())
+                        node.id to history
+                    }
+                }.awaitAll().toMap()
+            }
+            setState { copy(pingTasks = tasks, pingHistories = histories) }
         }
     }
 

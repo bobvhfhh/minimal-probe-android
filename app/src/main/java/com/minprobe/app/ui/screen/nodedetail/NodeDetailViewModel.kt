@@ -50,7 +50,6 @@ class NodeDetailViewModel(
                     setState { copy(selectedHours = event.hours) }
                     loadHistory()
                     loadPingHistory()
-                    loadPingHistory()
                 }
             }
             is NodeDetailContract.Event.Retry -> load()
@@ -85,9 +84,17 @@ class NodeDetailViewModel(
                 val nodes = nodeRepository.getNodes(s.baseUrl, sessionCookie, s.authType)
                 val node = nodes.firstOrNull { it.id == nodeId }
                     ?: throw IllegalStateException("节点不存在")
-                setState { copy(node = node, isLoading = false) }
+                val configuredTasks = if (s.authType == com.minprobe.app.domain.model.AuthType.PASSWORD) {
+                    runCatching {
+                        nodeRepository.getPingTasks(s.baseUrl, sessionCookie).filter { nodeId in it.nodeIds }
+                    }.getOrDefault(emptyList())
+                } else {
+                    emptyList()
+                }
+                setState { copy(node = node, configuredPingTasks = configuredTasks, isLoading = false) }
 
                 loadHistory()
+                loadPingHistory()
                 startLiveUpdates()
             } catch (e: Exception) {
                 handleError(e)

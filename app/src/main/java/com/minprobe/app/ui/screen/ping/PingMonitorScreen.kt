@@ -9,10 +9,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
@@ -161,7 +164,13 @@ private fun PingTaskDialog(initial: PingTask?, nodes: List<Node>, saving: Boolea
         onDismissRequest = onDismiss,
         title = { Text(if (initial == null) "添加监控" else "编辑监控") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 420.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 OutlinedTextField(name, { name = it }, label = { Text("名称") }, singleLine = true, modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(target, { target = it }, label = { Text("目标地址") }, supportingText = { Text("host:port，例如 1.1.1.1:443") }, singleLine = true, modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(interval, { value -> interval = value.filter { it.isDigit() } }, label = { Text("间隔（秒）") }, supportingText = { Text("5–3600 秒") }, singleLine = true, modifier = Modifier.fillMaxWidth())

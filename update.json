@@ -1,1 +1,1 @@
-{"changelog":"新增真实 TCP 延迟与丢包监控、彩色状态分段条和任务管理；优化节点卡片的资源风险提示。","downloadUrl":"https://github.com/bobvhfhh/minimal-probe-android/releases/download/v1.2.9/MinimalProbe-1.2.9-release.apk","versionCode":12,"versionName":"1.2.9"}
+{"changelog":"修复 TCP 监控任务节点选择无法滚动；节点卡片直接显示真实 TCP 延迟、丢包和历史状态条；刚保存的任务会显示等待首个采样。","downloadUrl":"https://github.com/bobvhfhh/minimal-probe-android/releases/download/v1.3.0/MinimalProbe-1.3.0-release.apk","versionCode":13,"versionName":"1.3.0"}

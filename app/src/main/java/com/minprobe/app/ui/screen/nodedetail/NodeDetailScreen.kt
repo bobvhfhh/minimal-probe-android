@@ -60,6 +60,7 @@ import com.minprobe.app.ui.screen.ping.PingHealth
 import com.minprobe.app.ui.screen.ping.formatPacketLoss
 import com.minprobe.app.ui.screen.ping.formatPingLatency
 import com.minprobe.app.ui.screen.ping.pingHealth
+import com.minprobe.app.ui.screen.ping.summarizePingTasks
 import java.util.Locale
 import org.koin.core.parameter.parametersOf
 
@@ -367,16 +368,18 @@ private fun NodeDetailContent(
             modifier = Modifier.padding(start = 4.dp, top = 6.dp, end = 4.dp)
         )
         when {
-            state.isPingLoading -> Box(Modifier.fillMaxWidth().height(92.dp)) {
+            state.isPingLoading && state.configuredPingTasks.isEmpty() -> Box(Modifier.fillMaxWidth().height(92.dp)) {
                 CircularProgressIndicator(Modifier.size(24.dp).align(Alignment.Center))
             }
+            state.pingHistory != null && (state.pingHistory!!.taskNames.isNotEmpty() || state.configuredPingTasks.isNotEmpty()) ->
+                PingHistoryCard(state.pingHistory!!, state.configuredPingTasks, node.id)
+            state.configuredPingTasks.isNotEmpty() ->
+                PingHistoryCard(com.minprobe.app.domain.model.PingHistory(), state.configuredPingTasks, node.id)
             state.pingError != null -> Text(
                 state.pingError!!,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(8.dp)
             )
-            state.pingHistory != null && state.pingHistory!!.taskNames.isNotEmpty() ->
-                PingHistoryCard(state.pingHistory!!)
             else -> Text(
                 "未配置 TCP 监控。请在节点列表右上角的延迟监控中添加任务。",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -388,7 +391,11 @@ private fun NodeDetailContent(
 }
 
 @Composable
-private fun PingHistoryCard(history: com.minprobe.app.domain.model.PingHistory) {
+private fun PingHistoryCard(
+    history: com.minprobe.app.domain.model.PingHistory,
+    tasks: List<com.minprobe.app.domain.model.PingTask>,
+    nodeId: Long
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
@@ -396,21 +403,19 @@ private fun PingHistoryCard(history: com.minprobe.app.domain.model.PingHistory) 
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            history.taskNames.forEach { (taskId, name) ->
-                val samples = history.points.filter { it.taskId == taskId }.takeLast(24)
-                val latest = samples.lastOrNull()
-                val totalLoss = history.totalLossPercent[taskId] ?: 0.0
+            summarizePingTasks(tasks, nodeId, history).forEach { summary ->
+                val samples = history.points.filter { it.taskId == summary.taskId }.takeLast(24)
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text(name, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
+                    Text(summary.name, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
                     Text(
-                        formatPingLatency(latest?.latencyMs),
-                        color = pingHealth(latest?.latencyMs, totalLoss).toColor(),
+                        if (summary.hasSamples) formatPingLatency(summary.latestLatencyMs) else "等待采样",
+                        color = if (summary.hasSamples) pingHealth(summary.latestLatencyMs, summary.totalLossPercent).toColor() else MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.titleSmall
                     )
                     Spacer(Modifier.width(10.dp))
                     Text(
-                        formatPacketLoss(totalLoss),
-                        color = pingHealth(latest?.latencyMs, totalLoss).toColor(),
+                        if (summary.hasSamples) formatPacketLoss(summary.totalLossPercent) else "—",
+                        color = if (summary.hasSamples) pingHealth(summary.latestLatencyMs, summary.totalLossPercent).toColor() else MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.titleSmall
                     )
                 }

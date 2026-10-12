@@ -3,6 +3,7 @@ package com.minprobe.app.ui.screen.nodedetail
 import com.minprobe.app.domain.model.MetricsHistory
 import com.minprobe.app.domain.model.Node
 import com.minprobe.app.domain.model.PingHistory
+import com.minprobe.app.domain.model.PingTask
 import com.minprobe.app.mvi.UiEffect
 import com.minprobe.app.mvi.UiEvent
 import com.minprobe.app.mvi.UiState
@@ -19,6 +20,7 @@ object NodeDetailContract {
         val isHistoryLoading: Boolean = false,
         val historyError: String? = null,
         val pingHistory: PingHistory? = null,
+        val configuredPingTasks: List<PingTask> = emptyList(),
         val isPingLoading: Boolean = false,
         val pingError: String? = null
     ) : UiState

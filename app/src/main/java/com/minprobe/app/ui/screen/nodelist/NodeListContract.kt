@@ -1,6 +1,8 @@
 package com.minprobe.app.ui.screen.nodelist
 
 import com.minprobe.app.domain.model.Node
+import com.minprobe.app.domain.model.PingHistory
+import com.minprobe.app.domain.model.PingTask
 import com.minprobe.app.mvi.UiEffect
 import com.minprobe.app.mvi.UiEvent
 import com.minprobe.app.mvi.UiState
@@ -13,6 +15,8 @@ object NodeListContract {
     data class State(
         val serverName: String = "",
         val nodes: List<Node> = emptyList(),
+        val pingTasks: List<PingTask> = emptyList(),
+        val pingHistories: Map<Long, PingHistory> = emptyMap(),
         val groups: List<String> = emptyList(),
         val isLoading: Boolean = true,
         val isRefreshing: Boolean = false,
