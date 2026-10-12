@@ -13,8 +13,8 @@ android {
         applicationId = "com.minprobe.app"
         minSdk = 28
         targetSdk = 36
-        versionCode = 7
-        versionName = "1.2.2"
+        versionCode = 8
+        versionName = "1.2.5"
     }
 
     signingConfigs {
