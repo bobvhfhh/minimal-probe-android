@@ -12,20 +12,14 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 /**
- * 应用更新检查。
- *
- * 从 update.json 读取最新版本信息。注意：仅做版本提示，
- * 下载通过系统浏览器打开 release 页面完成，不在 App 内静默下载安装。
- *
- * 发布前请将 UPDATE_URL 替换为你自己的仓库地址。
+ * 从仓库中的 update.json 检查可用更新。APK 下载及安装由 Android 系统安装器完成。
  */
 class UpdateCheckService(private val httpClient: HttpClient) {
 
     companion object {
         private const val TAG = "UpdateCheck"
-        // TODO: fork 后替换为你自己的仓库地址
         private const val UPDATE_URL =
-            "https://raw.githubusercontent.com/minprobe/minimal-probe-android/main/update.json"
+            "https://raw.githubusercontent.com/bobvhfhh/minimal-probe-android/master/update.json"
     }
 
     private val json = Json { ignoreUnknownKeys = true }
@@ -38,7 +32,9 @@ class UpdateCheckService(private val httpClient: HttpClient) {
             val response = httpClient.get(UPDATE_URL)
             if (!response.status.isSuccess()) return null
             val info = json.decodeFromString(UpdateInfo.serializer(), response.bodyAsText())
-            if (info.versionCode > currentVersionCode) {
+            if (UpdatePolicy.isNewer(info.versionCode, currentVersionCode) &&
+                UpdatePolicy.isSecureDownloadUrl(info.downloadUrl)
+            ) {
                 _latestUpdate.value = info
                 info
             } else {

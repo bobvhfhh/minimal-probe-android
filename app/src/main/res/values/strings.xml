@@ -126,7 +126,7 @@
     <string name="settings_update_available">发现新版本 %1$s</string>
     <string name="settings_update_latest">已是最新版本</string>
     <string name="settings_update_failed">检查更新失败</string>
-    <string name="settings_goto_download">前往下载</string>
+    <string name="settings_download_update">下载并安装更新</string>
 
     <!-- 生物识别 -->
     <string name="biometric_prompt_title">解锁极简探针</string>

@@ -11,7 +11,7 @@
 - **节点实时列表**：WebSocket 推送（服务端每 2 秒全量帧），兼容数组及 `{nodes:[...]}` 包装响应，搜索、分组筛选、在线/离线筛选、排序，下拉刷新
 - **节点详情**：实时指标（CPU/内存/磁盘/网络/负载/运行时间）、流量统计（本月/累计/今日）、到期提醒、系统信息
 - **历史图表**：CPU / 内存 / 磁盘 / 网络曲线（1h / 6h / 24h / 7d，窗口上限跟随服务端 retention）
-- **设置**：主题色、深浅色、语言（中/英）、字体缩放、图表动画、生物识别锁、配置备份导出/导入、检查更新
+- **设置**：主题色、深浅色、语言（中/英）、字体缩放、图表动画、生物识别锁、配置备份导出/导入、检查更新并在应用内下载/安装 APK
 
 ## App 预览
 
@@ -51,11 +51,11 @@
 ./gradlew assembleDebug
 ```
 
-Release 签名通过环境变量配置（见 `.github/workflows/release.yml`）：
+Release 使用 GitHub Actions Secrets 注入固定签名密钥（见 `.github/workflows/release.yml`）：
 `KEYSTORE_FILE` / `KEYSTORE_PASSWORD` / `KEY_ALIAS` / `KEY_PASSWORD`。
 
 打 tag（如 `v1.0.0`）推送后，GitHub Actions 自动构建签名 APK。
-注意：`UpdateCheckService.UPDATE_URL` 与 `update.json` 中的仓库地址请替换为你自己的。
+Release 资产命名为 `MinimalProbe-vX.Y.Z-release.apk`；后续同一签名链的版本可以直接覆盖安装。
 
 ## 截图
 
@@ -71,7 +71,7 @@ Release 签名通过环境变量配置（见 `.github/workflows/release.yml`）�
 
 生成的 APK 位于 `app/build/outputs/apk/debug/`。
 
-也可以直接从 [Releases](https://github.com/bobvhfhh/minimal-probe-android/releases) 下载 APK。
+也可以直接从 [Releases](https://github.com/bobvhfhh/minimal-probe-android/releases) 下载 APK。应用内更新会从 `update.json` 下载并调起系统安装器；Android 8+ 首次使用需要允许本应用安装未知来源应用。
 
 ## 连接面板
 
@@ -102,7 +102,7 @@ Release 签名通过环境变量配置（见 `.github/workflows/release.yml`）�
 
 ## 发布构建
 
-Release 签名通过以下环境变量配置：
+Release 构建在 CI 中通过以下环境变量配置：
 
 ```text
 KEYSTORE_FILE

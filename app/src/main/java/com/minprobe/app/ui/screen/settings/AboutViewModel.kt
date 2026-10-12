@@ -7,6 +7,7 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import com.minprobe.app.R
 import com.minprobe.app.data.remote.UpdateCheckService
 import com.minprobe.app.data.remote.UpdateInfo
+import com.minprobe.app.data.remote.ApkUpdateInstaller
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,6 +17,8 @@ class AboutViewModel(
     private val updateCheckService: UpdateCheckService,
     private val context: Context
 ) : ScreenModel {
+
+    private val installer = ApkUpdateInstaller(context)
 
     private val _checking = MutableStateFlow(false)
     val checking: StateFlow<Boolean> = _checking.asStateFlow()
@@ -45,6 +48,8 @@ class AboutViewModel(
             }
         }
     }
+
+    fun downloadUpdate(info: UpdateInfo): Long = installer.enqueue(info)
 
     fun appVersionName(): String {
         return runCatching {

@@ -126,7 +126,7 @@
     <string name="settings_update_available">New version %1$s available</string>
     <string name="settings_update_latest">Already up to date</string>
     <string name="settings_update_failed">Update check failed</string>
-    <string name="settings_goto_download">Download</string>
+    <string name="settings_download_update">Download and install</string>
 
     <!-- 生物识别 -->
     <string name="biometric_prompt_title">Unlock MiniProbe</string>

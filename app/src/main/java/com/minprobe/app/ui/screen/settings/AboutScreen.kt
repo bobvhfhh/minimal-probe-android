@@ -25,7 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -42,7 +41,6 @@ class AboutScreen : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        val uriHandler = LocalUriHandler.current
         val viewModel = koinScreenModel<AboutViewModel>()
         val checking by viewModel.checking.collectAsStateWithLifecycle()
         val updateMessage by viewModel.updateMessage.collectAsStateWithLifecycle()
@@ -113,10 +111,10 @@ class AboutScreen : Screen {
                 latestUpdate?.let { info ->
                     if (info.downloadUrl.isNotBlank()) {
                         OutlinedButton(
-                            onClick = { uriHandler.openUri(info.downloadUrl) },
+                            onClick = { viewModel.downloadUpdate(info) },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(stringResource(R.string.settings_goto_download))
+                            Text(stringResource(R.string.settings_download_update))
                         }
                         if (info.changelog.isNotBlank()) {
                             Text(
