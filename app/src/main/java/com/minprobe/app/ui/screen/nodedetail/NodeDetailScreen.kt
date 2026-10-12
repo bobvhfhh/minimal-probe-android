@@ -364,7 +364,7 @@ private fun NodeDetailContent(
         Text(
             "TCP 延迟监控",
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(horizontal = 4.dp, top = 6.dp)
+            modifier = Modifier.padding(start = 4.dp, top = 6.dp, end = 4.dp)
         )
         when {
             state.isPingLoading -> Box(Modifier.fillMaxWidth().height(92.dp)) {
