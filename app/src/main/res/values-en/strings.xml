@@ -14,6 +14,7 @@
     <!-- 服务器管理 -->
     <string name="server_management">Servers</string>
     <string name="server_list_title">My Panels</string>
+    <string name="server_active">Active</string>
     <string name="server_add">Add Panel</string>
     <string name="server_edit">Edit Panel</string>
     <string name="server_name">Name</string>
