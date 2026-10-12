@@ -144,7 +144,7 @@ class NodeListScreen : Screen {
                             singleLine = true,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                                .padding(horizontal = 16.dp, vertical = 4.dp)
                         )
                         FilterRow(
                             state = state,
@@ -166,8 +166,8 @@ class NodeListScreen : Screen {
                         } else {
                             LazyColumn(
                                 modifier = Modifier.fillMaxSize(),
-                                contentPadding = PaddingValues(vertical = 8.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                                contentPadding = PaddingValues(top = 8.dp, bottom = 20.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
                                 items(filteredNodes, key = { it.id }) { node ->
                                     NodeCard(node = node) {
