@@ -41,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -68,6 +69,7 @@ class NodeListScreen : Screen {
         val lifecycleOwner = LocalLifecycleOwner.current
         val viewModel = koinScreenModel<NodeListViewModel>()
         val state by viewModel.state.collectAsStateWithLifecycle()
+        val isWideScreen = LocalConfiguration.current.screenWidthDp >= 700
 
         // 前台时开启 WS 推送，后台时断开（省电省流量）
         DisposableEffect(lifecycleOwner) {
@@ -167,7 +169,7 @@ class NodeListScreen : Screen {
                             }
                         } else {
                             LazyVerticalGrid(
-                                columns = GridCells.Adaptive(minSize = 320.dp),
+                                columns = if (isWideScreen) GridCells.Adaptive(minSize = 360.dp) else GridCells.Fixed(1),
                                 modifier = Modifier.fillMaxSize(),
                                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                                 verticalArrangement = Arrangement.spacedBy(12.dp),

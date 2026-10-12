@@ -17,4 +17,11 @@ class NodeCardPresentationTest {
         assertEquals("JP · Debian GNU/Linux 13", nodeMetadataLine("jp", "", "Debian GNU/Linux 13"))
         assertEquals("", nodeMetadataLine("", "", ""))
     }
+
+    @Test
+    fun agentBadgeNormalizesVersionPrefix() {
+        assertEquals("V4", nodeAgentBadge("4"))
+        assertEquals("V4", nodeAgentBadge("v4"))
+        assertEquals("", nodeAgentBadge(""))
+    }
 }

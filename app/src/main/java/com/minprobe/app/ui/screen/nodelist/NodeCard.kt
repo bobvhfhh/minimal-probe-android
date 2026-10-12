@@ -1,5 +1,6 @@
 package com.minprobe.app.ui.screen.nodelist
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,22 +9,22 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import com.minprobe.app.R
 import com.minprobe.app.domain.model.Node
 import com.minprobe.app.ui.screen.formatAgo
@@ -32,183 +33,115 @@ import com.minprobe.app.ui.screen.formatSpeed
 import java.util.Locale
 
 internal fun nodeMetadataLine(country: String, group: String, os: String): String =
-    listOf(country.uppercase(Locale.US), group, os)
-        .filter { it.isNotBlank() }
-        .joinToString(" · ")
+    listOf(country.uppercase(Locale.US), group, os).filter { it.isNotBlank() }.joinToString(" · ")
+
+internal fun nodeAgentBadge(version: String): String = version.trim().removePrefix("v").removePrefix("V")
+    .takeIf { it.isNotBlank() }?.let { "V$it" } ?: ""
 
 @Composable
 fun NodeCard(node: Node, onClick: () -> Unit) {
-    val context = LocalContext.current
+    val context = androidx.compose.ui.platform.LocalContext.current
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .clickable(onClick = onClick),
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
         shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.cardColors(
-            containerColor = if (node.online) {
-                MaterialTheme.colorScheme.surfaceContainerLow
-            } else {
-                MaterialTheme.colorScheme.surfaceContainerHigh
-            }
-        ),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    node.country.ifBlank { "•" }.uppercase(Locale.US),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(end = 8.dp)
-                )
-                Text(
-                    node.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f).padding(end = 10.dp)
-                )
-                StatusBadge(online = node.online)
-            }
-
-            if (node.country.isNotBlank() || node.group.isNotBlank() || node.os.isNotBlank()) {
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    nodeMetadataLine(node.country, node.group, node.os),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-
+        Column(Modifier.fillMaxWidth().padding(16.dp)) {
+            NodeHeader(node)
             if (!node.online) {
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    stringResource(
-                        R.string.node_offline_ago,
-                        formatAgo(context, node.lastSeenAgo)
-                    ),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Spacer(Modifier.height(10.dp))
+                Text(stringResource(R.string.node_offline_ago, formatAgo(context, node.lastSeenAgo)), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 return@Column
             }
-
-            val metrics = node.metrics
-            if (metrics == null) {
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    stringResource(R.string.node_never_seen),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                return@Column
+            val metrics = node.metrics ?: run {
+                Spacer(Modifier.height(10.dp)); Text(stringResource(R.string.node_never_seen), color = MaterialTheme.colorScheme.onSurfaceVariant); return@Column
             }
-
-            Spacer(Modifier.height(7.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-                CompactMetric(stringResource(R.string.metric_cpu), String.format(Locale.US, "%.1f%%", metrics.cpu), (metrics.cpu / 100).toFloat(), Modifier.weight(1f))
-                CompactMetric(stringResource(R.string.metric_mem), "${node.memPercent.toInt()}%", (node.memPercent / 100).toFloat(), Modifier.weight(1f))
+            Spacer(Modifier.height(14.dp))
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                NodeMetric("CPU", String.format(Locale.US, "%.1f%%", metrics.cpu), "${node.cpuCores} 核", (metrics.cpu / 100).toFloat(), MaterialTheme.colorScheme.primary, Modifier.weight(1f))
+                NodeMetric(stringResource(R.string.metric_mem), String.format(Locale.US, "%.1f%%", node.memPercent), "${formatBytes(metrics.memUsed)} / ${formatBytes(metrics.memTotal)}", (node.memPercent / 100).toFloat(), MaterialTheme.colorScheme.tertiary, Modifier.weight(1f))
             }
-            Spacer(Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-                CompactMetric(stringResource(R.string.metric_disk), "${node.diskPercent.toInt()}%", (node.diskPercent / 100).toFloat(), Modifier.weight(1f))
-                CompactMetric(stringResource(R.string.metric_load), String.format(Locale.US, "%.2f", metrics.load1), (metrics.load1 / 4).toFloat(), Modifier.weight(1f))
+            Spacer(Modifier.height(13.dp))
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                NodeMetric(stringResource(R.string.metric_disk), String.format(Locale.US, "%.1f%%", node.diskPercent), "${formatBytes(metrics.diskUsed)} / ${formatBytes(metrics.diskTotal)}", (node.diskPercent / 100).toFloat(), MaterialTheme.colorScheme.secondary, Modifier.weight(1f))
+                NodeMetric(stringResource(R.string.metric_load), String.format(Locale.US, "%.2f", metrics.load1), "1 / 5 / 15 min", (metrics.load1 / 4).toFloat(), MaterialTheme.colorScheme.error, Modifier.weight(1f))
             }
-            Spacer(Modifier.height(7.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    "↓ ${formatSpeed(metrics.netRx)}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    "↑ ${formatSpeed(metrics.netTx)}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                if (node.trafficLimit > 0) {
-                    Text(
-                        "${formatBytes(node.monthUsed)} / ${formatBytes(node.trafficLimit)}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+            Spacer(Modifier.height(15.dp))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = .45f))
+            Spacer(Modifier.height(12.dp))
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                TrafficValue("↑ 上行", formatSpeed(metrics.netTx), "出站 ${formatBytes(node.totalTx)}", MaterialTheme.colorScheme.primary, Modifier.weight(1f))
+                TrafficValue("↓ 下行", formatSpeed(metrics.netRx), "入站 ${formatBytes(node.totalRx)}", MaterialTheme.colorScheme.secondary, Modifier.weight(1f))
             }
-            Spacer(Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                Text("TCP ${metrics.tcp} · UDP ${metrics.udp}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(if (node.expiresIn != null) "${node.expiresIn}天" else "—", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
+            if (node.trafficLimit > 0) {
+                Spacer(Modifier.height(12.dp))
+                SegmentMeter("剩余流量", "${formatBytes((node.trafficLimit - node.monthUsed).coerceAtLeast(0))} · ${formatBytes(node.monthUsed)} / ${formatBytes(node.trafficLimit)}", 1f - node.monthUsed.toFloat() / node.trafficLimit, MaterialTheme.colorScheme.primary)
+            }
+            Spacer(Modifier.height(13.dp))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = .45f))
+            Spacer(Modifier.height(10.dp))
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                FooterValue("TCP 连接", metrics.tcp.toString(), MaterialTheme.colorScheme.primary)
+                FooterValue("UDP 连接", metrics.udp.toString(), MaterialTheme.colorScheme.secondary)
+                FooterValue("到期", node.expiresIn?.let { "${it}天" } ?: "—", MaterialTheme.colorScheme.tertiary)
             }
         }
     }
 }
 
-@Composable
-private fun StatusBadge(online: Boolean) {
-    val foreground = if (online) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.error
-    }
-    Surface(
-        color = if (online) {
-            MaterialTheme.colorScheme.primaryContainer
-        } else {
-            MaterialTheme.colorScheme.errorContainer
-        },
-        shape = MaterialTheme.shapes.extraLarge
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp)
-        ) {
-            androidx.compose.foundation.Canvas(
-                modifier = Modifier.width(6.dp).height(6.dp)
-            ) {
-                drawCircle(foreground)
-            }
-            Text(
-                if (online) "ONLINE" else "OFFLINE",
-                style = MaterialTheme.typography.labelSmall,
-                color = if (online) {
-                    MaterialTheme.colorScheme.onPrimaryContainer
-                } else {
-                    MaterialTheme.colorScheme.onErrorContainer
-                }
-            )
+@Composable private fun NodeHeader(node: Node) {
+    val indicatorColor = if (node.online) Color(0xFF249A3A) else MaterialTheme.colorScheme.error
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Canvas(Modifier.size(12.dp)) { drawCircle(indicatorColor) }
+        Spacer(Modifier.width(10.dp))
+        Column(Modifier.weight(1f)) {
+            Text(node.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Spacer(Modifier.height(3.dp))
+            Text(node.os.ifBlank { nodeMetadataLine(node.country, node.group, "") }, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
+        nodeAgentBadge(node.agentVersion).takeIf { it.isNotBlank() }?.let { AgentBadge(it) }
+        Spacer(Modifier.width(7.dp))
+        StatusBadge(node.online)
     }
 }
 
-@Composable
-private fun CompactMetric(label: String, valueText: String, fraction: Float, modifier: Modifier = Modifier) {
-    Column(modifier = modifier) {
-        Text(
-            label,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(Modifier.height(3.dp))
-        LinearProgressIndicator(
-            progress = { fraction.coerceIn(0f, 1f) },
-            color = MaterialTheme.colorScheme.primary,
-            trackColor = MaterialTheme.colorScheme.surfaceVariant,
-            modifier = Modifier.fillMaxWidth().height(5.dp).clip(MaterialTheme.shapes.small)
-        )
-        Text(
-            valueText,
-            style = MaterialTheme.typography.labelMedium,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(top = 3.dp)
-        )
+@Composable private fun AgentBadge(text: String) = Surface(color = MaterialTheme.colorScheme.primaryContainer, shape = MaterialTheme.shapes.small) {
+    Text(text, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onPrimaryContainer)
+}
+
+@Composable private fun StatusBadge(online: Boolean) = Surface(
+    color = if (online) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.errorContainer,
+    shape = MaterialTheme.shapes.large
+) { Text(if (online) "ONLINE" else "OFFLINE", modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp), style = MaterialTheme.typography.labelSmall, color = if (online) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onErrorContainer) }
+
+@Composable private fun NodeMetric(label: String, value: String, detail: String, progress: Float, color: Color, modifier: Modifier) = Column(modifier) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(value, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
     }
+    Text(detail, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    Spacer(Modifier.height(6.dp)); Segments(progress, color)
+}
+
+@Composable private fun TrafficValue(label: String, value: String, detail: String, color: Color, modifier: Modifier) = Column(modifier) {
+    Text(label, style = MaterialTheme.typography.labelMedium, color = color)
+    Text(value, style = MaterialTheme.typography.titleLarge, color = color, fontWeight = FontWeight.Bold, maxLines = 1)
+    Text(detail, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+}
+
+@Composable private fun SegmentMeter(label: String, value: String, progress: Float, color: Color) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text(label, style = MaterialTheme.typography.labelMedium); Text(value, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+    Spacer(Modifier.height(6.dp)); Segments(progress, color)
+}
+
+@Composable private fun Segments(progress: Float, color: Color) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+        repeat(18) { index -> Surface(modifier = Modifier.weight(1f).height(7.dp), shape = MaterialTheme.shapes.extraSmall, color = if (index < (progress.coerceIn(0f, 1f) * 18).toInt()) color else MaterialTheme.colorScheme.surfaceVariant) {} }
+    }
+}
+
+@Composable private fun FooterValue(label: String, value: String, color: Color) = Column {
+    Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(value, style = MaterialTheme.typography.titleSmall, color = color, fontWeight = FontWeight.SemiBold)
 }
