@@ -97,6 +97,13 @@ fun NodeCard(node: Node, onClick: () -> Unit) {
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+            } else if (node.country.isNotBlank()) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    node.country.uppercase(Locale.US),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
 
             if (!node.online) {
