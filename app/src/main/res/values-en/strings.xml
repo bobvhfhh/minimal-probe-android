@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MiniProbe</string>
+
+    <!-- 通用 -->
+    <string name="action_cancel">Cancel</string>
+    <string name="action_confirm">OK</string>
+    <string name="action_save">Save</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_retry">Retry</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="action_test">Test connection</string>
+
+    <!-- 服务器管理 -->
+    <string name="server_management">Servers</string>
+    <string name="server_list_title">My Panels</string>
+    <string name="server_add">Add Panel</string>
+    <string name="server_edit">Edit Panel</string>
+    <string name="server_name">Name</string>
+    <string name="server_name_hint">e.g. My Probe</string>
+    <string name="server_url">Panel URL</string>
+    <string name="server_url_hint">https://probe.example.com</string>
+    <string name="auth_type">Auth method</string>
+    <string name="auth_type_password">Admin password</string>
+    <string name="auth_type_guest">Guest mode (public page)</string>
+    <string name="server_password">Admin password (emergency password)</string>
+    <string name="server_password_hint">Emergency password set on the panel</string>
+    <string name="server_insecure_warning">Using plain http; the password is sent unencrypted. Use https instead.</string>
+    <string name="server_test_ok">Connected: %1$s</string>
+    <string name="server_test_guest_ok">Guest connected (public page)</string>
+    <string name="server_test_failed">Connection failed: %1$s</string>
+    <string name="server_saved">Saved</string>
+    <string name="server_deleted">Deleted</string>
+    <string name="server_delete_confirm">Delete "%1$s"?</string>
+    <string name="server_empty">No panels yet\nTap + to add your probe panel</string>
+    <string name="server_need_url">Please enter the panel URL</string>
+    <string name="server_need_name">Please enter a name</string>
+    <string name="server_need_password">Please enter the admin password</string>
+    <string name="server_relogin">Re-login</string>
+    <string name="server_relogin_title">Session expired, please log in again</string>
+    <string name="error_no_server_selected">Please select a panel first</string>
+    <string name="error_no_session">Session expired, please log in again</string>
+
+    <!-- 节点列表 -->
+    <string name="node_list">Nodes</string>
+    <string name="node_search_hint">Search nodes…</string>
+    <string name="node_filter_all">All</string>
+    <string name="node_filter_online">Online</string>
+    <string name="node_filter_offline">Offline</string>
+    <string name="node_group_all">All groups</string>
+    <string name="node_load_failed">Load failed: %1$s</string>
+    <string name="node_refresh_failed">Refresh failed: %1$s</string>
+    <string name="node_empty">No nodes</string>
+    <string name="node_offline_ago">Offline %1$s</string>
+    <string name="node_never_seen">Never seen</string>
+    <string name="sort_by">Sort</string>
+    <string name="sort_default">Default</string>
+    <string name="sort_name">Name</string>
+    <string name="sort_cpu">CPU</string>
+    <string name="sort_mem">Memory</string>
+
+    <!-- 节点详情 -->
+    <string name="node_detail">Node detail</string>
+    <string name="detail_overview">Overview</string>
+    <string name="detail_charts">History</string>
+    <string name="detail_info">Info</string>
+    <string name="metric_cpu">CPU</string>
+    <string name="metric_mem">Memory</string>
+    <string name="metric_swap">Swap</string>
+    <string name="metric_disk">Disk</string>
+    <string name="metric_net">Network</string>
+    <string name="metric_load">Load</string>
+    <string name="metric_uptime">Uptime</string>
+    <string name="metric_procs">Processes</string>
+    <string name="metric_tcp">TCP conns</string>
+    <string name="info_os">OS</string>
+    <string name="info_kernel">Kernel</string>
+    <string name="info_arch">Arch</string>
+    <string name="info_virt">Virt</string>
+    <string name="info_cpu">CPU model</string>
+    <string name="info_agent">Agent version</string>
+    <string name="info_country">Region</string>
+    <string name="info_group">Group</string>
+    <string name="traffic_month_used">Used this month</string>
+    <string name="traffic_total">Total traffic</string>
+    <string name="traffic_day">Today</string>
+    <string name="expiry_remaining">%1$d days left</string>
+    <string name="expiry_expired">Expired</string>
+    <string name="expiry_title">Expiry</string>
+    <string name="chart_hours_1">1h</string>
+    <string name="chart_hours_6">6h</string>
+    <string name="chart_hours_24">1d</string>
+    <string name="chart_hours_168">7d</string>
+    <string name="chart_loading">Loading history…</string>
+    <string name="chart_empty">No history data</string>
+
+    <!-- 设置 -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_theme_color">Theme color</string>
+    <string name="settings_dark_mode">Dark mode</string>
+    <string name="settings_dark_mode_system">Follow system</string>
+    <string name="settings_dark_mode_light">Light</string>
+    <string name="settings_dark_mode_dark">Dark</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_language_system">Follow system</string>
+    <string name="settings_font_scale">Font size</string>
+    <string name="settings_chart_animation">Chart animation</string>
+    <string name="settings_security">Security</string>
+    <string name="settings_biometric">Biometric unlock on launch</string>
+    <string name="settings_biometric_desc">Require fingerprint/face on every launch</string>
+    <string name="settings_backup">Backup</string>
+    <string name="settings_export_config">Export config</string>
+    <string name="settings_export_config_desc">Export panels &amp; prefs to a JSON file</string>
+    <string name="settings_export_plaintext_warning">Warning: the export contains plaintext passwords. Keep it safe and never share it.</string>
+    <string name="settings_export_success">Exported %1$d panels</string>
+    <string name="settings_export_failed">Export failed: %1$s</string>
+    <string name="settings_import_config">Import config</string>
+    <string name="settings_import_config_desc">Restore panels &amp; prefs from a JSON file</string>
+    <string name="settings_import_success">Imported %1$d panels (%2$d new, %3$d updated)</string>
+    <string name="settings_import_failed">Import failed: %1$s</string>
+    <string name="settings_about">About</string>
+    <string name="settings_version">Version</string>
+    <string name="settings_check_update">Check for updates</string>
+    <string name="settings_update_available">New version %1$s available</string>
+    <string name="settings_update_latest">Already up to date</string>
+    <string name="settings_update_failed">Update check failed</string>
+    <string name="settings_goto_download">Download</string>
+
+    <!-- 生物识别 -->
+    <string name="biometric_prompt_title">Unlock MiniProbe</string>
+    <string name="biometric_prompt_subtitle">Verify your identity to continue</string>
+    <string name="biometric_locked_title">Locked</string>
+    <string name="biometric_locked_desc">Biometrics unavailable (unsupported or not enrolled). The app is locked to protect your panel passwords. Enroll biometrics in system settings and retry.</string>
+
+    <!-- 时间 -->
+    <string name="time_just_now">Just now</string>
+    <string name="time_minutes_ago">%1$d min ago</string>
+    <string name="time_hours_ago">%1$d h ago</string>
+    <string name="time_days_ago">%1$d d ago</string>
+</resources>
