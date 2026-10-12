@@ -8,7 +8,7 @@ internal object UpdatePolicy {
         val safeVersion = versionName.replace(Regex("[^A-Za-z0-9._-]"), "-")
             .trim('-', '.', '_')
             .ifBlank { "latest" }
-        return "MinimalProbe-v$safeVersion-release.apk"
+        return "MinimalProbe-$safeVersion-release.apk"
     }
 
     fun isSecureDownloadUrl(value: String): Boolean = runCatching {

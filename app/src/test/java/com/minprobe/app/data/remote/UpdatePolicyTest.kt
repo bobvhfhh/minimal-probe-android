@@ -15,8 +15,8 @@ class UpdatePolicyTest {
 
     @Test
     fun apkFileNameUsesSafeVersionAndReleaseLabel() {
-        assertEquals("MinimalProbe-v1.2.2-release.apk", UpdatePolicy.apkFileName("1.2.2"))
-        assertEquals("MinimalProbe-v1-2-2-release.apk", UpdatePolicy.apkFileName("1/2/2"))
+        assertEquals("MinimalProbe-1.2.2-release.apk", UpdatePolicy.apkFileName("1.2.2"))
+        assertEquals("MinimalProbe-1-2-2-release.apk", UpdatePolicy.apkFileName("1/2/2"))
     }
 
     @Test
