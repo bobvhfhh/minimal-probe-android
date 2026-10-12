@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">MiniProbe</string>
+    <string name="app_name">MinProbe</string>
 
     <!-- 通用 -->
     <string name="action_cancel">Cancel</string>
@@ -129,7 +129,7 @@
     <string name="settings_download_update">Download and install</string>
 
     <!-- 生物识别 -->
-    <string name="biometric_prompt_title">Unlock MiniProbe</string>
+    <string name="biometric_prompt_title">Unlock MinProbe</string>
     <string name="biometric_prompt_subtitle">Verify your identity to continue</string>
     <string name="biometric_locked_title">Locked</string>
     <string name="biometric_locked_desc">Biometrics unavailable (unsupported or not enrolled). The app is locked to protect your panel passwords. Enroll biometrics in system settings and retry.</string>

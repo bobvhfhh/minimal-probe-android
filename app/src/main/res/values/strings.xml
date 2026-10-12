@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">极简探针</string>
+    <string name="app_name">MinProbe</string>
 
     <!-- 通用 -->
     <string name="action_cancel">取消</string>
@@ -129,7 +129,7 @@
     <string name="settings_download_update">下载并安装更新</string>
 
     <!-- 生物识别 -->
-    <string name="biometric_prompt_title">解锁极简探针</string>
+    <string name="biometric_prompt_title">解锁 MinProbe</string>
     <string name="biometric_prompt_subtitle">验证身份以继续</string>
     <string name="biometric_locked_title">已锁定</string>
     <string name="biometric_locked_desc">生物识别不可用（设备不支持或未录入），为保护你的面板密码，应用已锁定。请到系统设置中录入指纹/面容后重试。</string>

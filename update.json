@@ -1,1 +1,1 @@
-{"changelog":"修复 TCP 监控任务节点选择无法滚动；节点卡片直接显示真实 TCP 延迟、丢包和历史状态条；刚保存的任务会显示等待首个采样。","downloadUrl":"https://github.com/bobvhfhh/minimal-probe-android/releases/download/v1.3.0/MinimalProbe-1.3.0-release.apk","versionCode":13,"versionName":"1.3.0"}
+{"changelog":"应用更名为 MinProbe；更新为全新的监控脉冲桌面图标。","downloadUrl":"https://github.com/bobvhfhh/minimal-probe-android/releases/download/v1.3.1/MinProbe-1.3.1-release.apk","versionCode":14,"versionName":"1.3.1"}

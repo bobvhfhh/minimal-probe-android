@@ -34,12 +34,12 @@ jobs:
           KEY_PASSWORD: ${{ secrets.MINIPROBE_KEY_PASSWORD }}
         run: bash gradlew testDebugUnitTest assembleRelease --stacktrace
       - name: Rename APK
-        run: mv app/build/outputs/apk/release/app-release.apk "app/build/outputs/apk/release/MinimalProbe-${GITHUB_REF_NAME#v}-release.apk"
+        run: mv app/build/outputs/apk/release/app-release.apk "app/build/outputs/apk/release/MinProbe-${GITHUB_REF_NAME#v}-release.apk"
       - uses: actions/upload-artifact@v4
         with:
           name: miniprobe-release-apk
-          path: app/build/outputs/apk/release/MinimalProbe-*-release.apk
+          path: app/build/outputs/apk/release/MinProbe-*-release.apk
       - uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
-          files: app/build/outputs/apk/release/MinimalProbe-*-release.apk
+          files: app/build/outputs/apk/release/MinProbe-*-release.apk

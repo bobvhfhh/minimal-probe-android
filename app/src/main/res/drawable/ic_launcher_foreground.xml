@@ -4,18 +4,29 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- MiniProbe: radar + pulse mark -->
+    <!-- MinProbe: monitor pulse + online status -->
     <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M54,18 A36,36 0,1 0,54,90 A36,36 0,1 0,54,18 M54,28 A26,26 0,1 1,54,80 A26,26 0,1 1,54,28" />
+        android:fillColor="#172546"
+        android:pathData="M54,19 A35,35 0,1 0,54,89 A35,35 0,1 0,54,19" />
     <path
         android:fillColor="#00000000"
-        android:strokeColor="#0B6E4F"
-        android:strokeWidth="5"
+        android:strokeColor="#2F4C78"
+        android:strokeWidth="2"
+        android:pathData="M54,23 A31,31 0,1 0,54,85 A31,31 0,1 0,54,23" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#77F0EC"
+        android:strokeWidth="4.5"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M18,54 L35,54 L43,38 L54,70 L64,48 L74,58 L90,58" />
+        android:pathData="M24,57 L39,57 L45,46 L53,68 L63,39 L71,58 L84,58" />
     <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M54,45 A9,9 0,1 0,54,63 A9,9 0,1 0,54,45" />
+        android:fillColor="#4CF1A5"
+        android:pathData="M75,28 A6,6 0,1 0,75,40 A6,6 0,1 0,75,28" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#4CF1A5"
+        android:strokeAlpha="0.36"
+        android:strokeWidth="2"
+        android:pathData="M75,23 A11,11 0,1 0,75,45 A11,11 0,1 0,75,23" />
 </vector>
