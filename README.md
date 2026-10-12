@@ -13,6 +13,12 @@
 - **历史图表**：CPU / 内存 / 磁盘 / 网络曲线（1h / 6h / 24h / 7d，窗口上限跟随服务端 retention）
 - **设置**：主题色、深浅色、语言（中/英）、字体缩放、图表动画、生物识别锁、配置备份导出/导入、检查更新
 
+## App 预览
+
+![MiniProbe App 预览](docs/preview.svg)
+
+> 图片为功能示意图，展示面板列表、实时节点和节点详情三个核心页面。
+
 ## 极简探针 API 适配
 
 | 功能 | 接口 |
@@ -64,6 +70,8 @@ Release 签名通过环境变量配置（见 `.github/workflows/release.yml`）�
 ```
 
 生成的 APK 位于 `app/build/outputs/apk/debug/`。
+
+也可以直接从 [Releases](https://github.com/bobvhfhh/minimal-probe-android/releases) 下载 APK。
 
 ## 连接面板
 
