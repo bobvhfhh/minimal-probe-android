@@ -1,7 +1,5 @@
 package com.minprobe.app.data.remote
 
-import android.net.Uri
-
 internal object UpdatePolicy {
     fun isNewer(remoteVersionCode: Int, currentVersionCode: Int): Boolean =
         remoteVersionCode > currentVersionCode
@@ -14,6 +12,6 @@ internal object UpdatePolicy {
     }
 
     fun isSecureDownloadUrl(value: String): Boolean = runCatching {
-        Uri.parse(value).let { it.scheme == "https" && !it.host.isNullOrBlank() }
+        java.net.URI(value).let { it.scheme.equals("https", ignoreCase = true) && !it.host.isNullOrBlank() }
     }.getOrDefault(false)
 }
