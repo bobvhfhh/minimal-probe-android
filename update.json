@@ -1,1 +1,1 @@
-{"changelog":"重做手机端监控卡片，并采用完整主题配色方案","downloadUrl":"https://github.com/bobvhfhh/minimal-probe-android/releases/download/v1.2.6/MinimalProbe-1.2.6-release.apk","versionCode":9,"versionName":"1.2.6"}
+{"changelog":"新增真实 TCP 延迟与丢包监控、彩色状态分段条和任务管理；优化节点卡片的资源风险提示。","downloadUrl":"https://github.com/bobvhfhh/minimal-probe-android/releases/download/v1.2.7/MinimalProbe-1.2.7-release.apk","versionCode":10,"versionName":"1.2.7"}

@@ -59,13 +59,13 @@ fun NodeCard(node: Node, onClick: () -> Unit) {
             }
             Spacer(Modifier.height(14.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                NodeMetric("CPU", String.format(Locale.US, "%.1f%%", metrics.cpu), "${node.cpuCores} 核", (metrics.cpu / 100).toFloat(), MaterialTheme.colorScheme.primary, Modifier.weight(1f))
-                NodeMetric(stringResource(R.string.metric_mem), String.format(Locale.US, "%.1f%%", node.memPercent), "${formatBytes(metrics.memUsed)} / ${formatBytes(metrics.memTotal)}", (node.memPercent / 100).toFloat(), MaterialTheme.colorScheme.tertiary, Modifier.weight(1f))
+                NodeMetric("CPU", String.format(Locale.US, "%.1f%%", metrics.cpu), "${node.cpuCores} 核", (metrics.cpu / 100).toFloat(), Modifier.weight(1f))
+                NodeMetric(stringResource(R.string.metric_mem), String.format(Locale.US, "%.1f%%", node.memPercent), "${formatBytes(metrics.memUsed)} / ${formatBytes(metrics.memTotal)}", (node.memPercent / 100).toFloat(), Modifier.weight(1f))
             }
             Spacer(Modifier.height(13.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                NodeMetric(stringResource(R.string.metric_disk), String.format(Locale.US, "%.1f%%", node.diskPercent), "${formatBytes(metrics.diskUsed)} / ${formatBytes(metrics.diskTotal)}", (node.diskPercent / 100).toFloat(), MaterialTheme.colorScheme.secondary, Modifier.weight(1f))
-                NodeMetric(stringResource(R.string.metric_load), String.format(Locale.US, "%.2f", metrics.load1), "1 / 5 / 15 min", (metrics.load1 / 4).toFloat(), MaterialTheme.colorScheme.error, Modifier.weight(1f))
+                NodeMetric(stringResource(R.string.metric_disk), String.format(Locale.US, "%.1f%%", node.diskPercent), "${formatBytes(metrics.diskUsed)} / ${formatBytes(metrics.diskTotal)}", (node.diskPercent / 100).toFloat(), Modifier.weight(1f))
+                NodeMetric(stringResource(R.string.metric_load), String.format(Locale.US, "%.2f", metrics.load1), "1 / 5 / 15 min", (metrics.load1 / 4).toFloat(), Modifier.weight(1f))
             }
             Spacer(Modifier.height(15.dp))
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = .45f))
@@ -76,7 +76,7 @@ fun NodeCard(node: Node, onClick: () -> Unit) {
             }
             if (node.trafficLimit > 0) {
                 Spacer(Modifier.height(12.dp))
-                SegmentMeter("剩余流量", "${formatBytes((node.trafficLimit - node.monthUsed).coerceAtLeast(0))} · ${formatBytes(node.monthUsed)} / ${formatBytes(node.trafficLimit)}", 1f - node.monthUsed.toFloat() / node.trafficLimit, MaterialTheme.colorScheme.primary)
+                SegmentMeter("流量用量", "${formatBytes((node.trafficLimit - node.monthUsed).coerceAtLeast(0))} 剩余 · ${formatBytes(node.monthUsed)} / ${formatBytes(node.trafficLimit)}", node.monthUsed.toFloat() / node.trafficLimit)
             }
             Spacer(Modifier.height(13.dp))
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = .45f))
@@ -115,13 +115,13 @@ fun NodeCard(node: Node, onClick: () -> Unit) {
     shape = MaterialTheme.shapes.large
 ) { Text(if (online) "ONLINE" else "OFFLINE", modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp), style = MaterialTheme.typography.labelSmall, color = if (online) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onErrorContainer) }
 
-@Composable private fun NodeMetric(label: String, value: String, detail: String, progress: Float, color: Color, modifier: Modifier) = Column(modifier) {
+@Composable private fun NodeMetric(label: String, value: String, detail: String, progress: Float, modifier: Modifier) = Column(modifier) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(value, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
     }
     Text(detail, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
-    Spacer(Modifier.height(6.dp)); Segments(progress, color)
+    Spacer(Modifier.height(6.dp)); Segments(progress)
 }
 
 @Composable private fun TrafficValue(label: String, value: String, detail: String, color: Color, modifier: Modifier) = Column(modifier) {
@@ -130,14 +130,28 @@ fun NodeCard(node: Node, onClick: () -> Unit) {
     Text(detail, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
 }
 
-@Composable private fun SegmentMeter(label: String, value: String, progress: Float, color: Color) {
+@Composable private fun SegmentMeter(label: String, value: String, progress: Float) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text(label, style = MaterialTheme.typography.labelMedium); Text(value, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
-    Spacer(Modifier.height(6.dp)); Segments(progress, color)
+    Spacer(Modifier.height(6.dp)); Segments(progress)
 }
 
-@Composable private fun Segments(progress: Float, color: Color) {
+/** 用绿、黄、红表达资源余量；已占用越多，颜色越接近风险色。 */
+@Composable private fun Segments(progress: Float) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-        repeat(18) { index -> Surface(modifier = Modifier.weight(1f).height(7.dp), shape = MaterialTheme.shapes.extraSmall, color = if (index < (progress.coerceIn(0f, 1f) * 18).toInt()) color else MaterialTheme.colorScheme.surfaceVariant) {} }
+        val active = (progress.coerceIn(0f, 1f) * 18).toInt()
+        repeat(18) { index ->
+            val color = when {
+                index >= active -> MaterialTheme.colorScheme.surfaceVariant
+                index < 11 -> Color(0xFF35C878)
+                index < 15 -> Color(0xFFF2B84B)
+                else -> Color(0xFFE24B4B)
+            }
+            Surface(
+                modifier = Modifier.weight(1f).height(7.dp),
+                shape = MaterialTheme.shapes.extraSmall,
+                color = color
+            ) {}
+        }
     }
 }
 

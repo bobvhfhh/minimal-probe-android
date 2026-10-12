@@ -9,8 +9,9 @@
 
 - **多面板管理**：保存多个探针面板，支持管理员密码（应急密码）与访客模式（公开页）
 - **节点实时列表**：WebSocket 推送（服务端每 2 秒全量帧），兼容数组及 `{nodes:[...]}` 包装响应，搜索、分组筛选、在线/离线筛选、排序，下拉刷新
-- **响应式监控卡片**：节点列表在手机上单列、横屏/大屏自动多列，展示 CPU、内存、磁盘、负载、网络、TCP/UDP、流量和到期信息
-- **节点详情**：实时指标（CPU/内存/磁盘/网络/负载/运行时间）、流量统计（本月/累计/今日）、到期提醒、系统信息
+- **响应式监控卡片**：节点列表在手机上单列、横屏/大屏自动多列，展示 CPU、内存、磁盘、负载、网络、TCP/UDP、流量和到期信息；资源分段条会按绿色 / 黄色 / 红色提示风险
+- **真实 TCP 延迟与丢包监控**：管理员可创建 `host:port` 监控任务，选择执行节点和 5–3600 秒间隔；节点 Agent 实际建立 TCP 连接，App 展示延迟、准确窗口丢包率及彩色历史分段条
+- **节点详情**：实时指标（CPU/内存/磁盘/网络/负载/运行时间）、流量统计（本月/累计/今日）、到期提醒、系统信息、TCP 延迟与丢包历史
 - **历史图表**：CPU / 内存 / 磁盘 / 网络曲线（1h / 6h / 24h / 7d，窗口上限跟随服务端 retention）
 - **设置**：主题色、深浅色、语言（中/英）、字体缩放、图表动画、生物识别锁、配置备份导出/导入、检查更新并在应用内下载/安装 APK
 
@@ -30,6 +31,8 @@
 | 节点列表 | `GET /api/nodes`（兼容数组及 `{nodes:[...]}` 响应） |
 | 实时推送 | `GET /api/ws` WebSocket，服务端每 2 秒推送完整节点数组或包装对象 |
 | 历史指标 | `GET /api/nodes/{id}/metrics?hours=&points=&series=metrics` |
+| TCP 延迟历史 | `GET /api/nodes/{id}/metrics?hours=&points=&series=ping` |
+| TCP 任务管理 | `GET/POST /api/ping-tasks`、`DELETE /api/ping-tasks/{id}` |
 
 访客模式：面板开启公开页时，无需密码即可查看公开节点。
 
@@ -56,7 +59,7 @@ Release 使用 GitHub Actions Secrets 注入固定签名密钥（见 `.github/wo
 `KEYSTORE_FILE` / `KEYSTORE_PASSWORD` / `KEY_ALIAS` / `KEY_PASSWORD`。
 
 打 tag（如 `v1.0.0`）推送后，GitHub Actions 自动构建签名 APK。
-Release 资产命名为 `MinimalProbe-vX.Y.Z-release.apk`；后续同一签名链的版本可以直接覆盖安装。
+Release 资产命名为 `MinimalProbe-X.Y.Z-release.apk`；后续同一签名链的版本可以直接覆盖安装。
 
 ## 截图
 
@@ -90,6 +93,8 @@ Release 资产命名为 `MinimalProbe-vX.Y.Z-release.apk`；后续同一签名�
 - `POST /api/auth/logout`
 - `GET /api/nodes`
 - `GET /api/nodes/{id}/metrics`
+- `GET/POST /api/ping-tasks`
+- `DELETE /api/ping-tasks/{id}`
 - `GET /api/ws`
 
 节点响应兼容直接数组、`{ "nodes": [...] }` 和 `data` 包装格式；实时连接会根据面板地址自动选择 `ws` 或 `wss`。

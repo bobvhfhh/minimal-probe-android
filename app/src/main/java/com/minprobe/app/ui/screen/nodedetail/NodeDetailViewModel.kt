@@ -26,6 +26,7 @@ class NodeDetailViewModel(
 
     private var wsJob: Job? = null
     private var historyJob: Job? = null
+    private var pingJob: Job? = null
     private var server: ServerInstance? = null
     private var sessionCookie: String? = null
 
@@ -48,6 +49,8 @@ class NodeDetailViewModel(
                 if (event.hours != currentState.selectedHours) {
                     setState { copy(selectedHours = event.hours) }
                     loadHistory()
+                    loadPingHistory()
+                    loadPingHistory()
                 }
             }
             is NodeDetailContract.Event.Retry -> load()
@@ -135,6 +138,29 @@ class NodeDetailViewModel(
                             historyError = e.message ?: "加载失败"
                         )
                     }
+                }
+            }
+        }
+    }
+
+    /** TCP Ping 由节点 Agent 执行；此处只读取 Hub 聚合的真实延迟和丢包。 */
+    private fun loadPingHistory() {
+        val s = server ?: return
+        pingJob?.cancel()
+        setState { copy(isPingLoading = true, pingError = null) }
+        pingJob = screenModelScope.launch {
+            try {
+                val cookie = sessionCookie ?: serverRepository.ensureSessionCookie(s)
+                sessionCookie = cookie
+                val history = nodeRepository.getPingHistory(
+                    s.baseUrl, cookie, s.authType, nodeId, currentState.selectedHours
+                )
+                setState { copy(pingHistory = history, isPingLoading = false) }
+            } catch (e: Exception) {
+                if (e is SessionExpiredException) {
+                    sendEffect(NodeDetailContract.Effect.NavigateToRelogin)
+                } else {
+                    setState { copy(isPingLoading = false, pingError = e.message ?: "加载 TCP 延迟失败") }
                 }
             }
         }

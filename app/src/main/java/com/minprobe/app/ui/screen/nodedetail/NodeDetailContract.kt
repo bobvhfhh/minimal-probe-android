@@ -2,6 +2,7 @@ package com.minprobe.app.ui.screen.nodedetail
 
 import com.minprobe.app.domain.model.MetricsHistory
 import com.minprobe.app.domain.model.Node
+import com.minprobe.app.domain.model.PingHistory
 import com.minprobe.app.mvi.UiEffect
 import com.minprobe.app.mvi.UiEvent
 import com.minprobe.app.mvi.UiState
@@ -16,7 +17,10 @@ object NodeDetailContract {
         val availableHours: List<Int> = listOf(1, 6, 24),
         val history: MetricsHistory? = null,
         val isHistoryLoading: Boolean = false,
-        val historyError: String? = null
+        val historyError: String? = null,
+        val pingHistory: PingHistory? = null,
+        val isPingLoading: Boolean = false,
+        val pingError: String? = null
     ) : UiState
 
     sealed interface Event : UiEvent {

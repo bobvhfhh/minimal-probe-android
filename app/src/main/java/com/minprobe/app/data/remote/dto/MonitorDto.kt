@@ -4,6 +4,9 @@ import com.minprobe.app.domain.model.MetricPoint
 import com.minprobe.app.domain.model.MetricsHistory
 import com.minprobe.app.domain.model.Node
 import com.minprobe.app.domain.model.NodeMetrics
+import com.minprobe.app.domain.model.PingHistory
+import com.minprobe.app.domain.model.PingPoint
+import com.minprobe.app.domain.model.PingTask
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -154,6 +157,74 @@ data class MetricsHistoryDto(
         step = step,
         memTotal = memTotal,
         diskTotal = diskTotal
+    )
+}
+
+/** 管理员接口 GET/POST /api/ping-tasks。 */
+@Serializable
+data class PingTaskDto(
+    val id: Long = 0,
+    val name: String = "",
+    val target: String = "",
+    val interval: Int = 60,
+    val nodes: List<Long> = emptyList(),
+    val auto_join: Boolean = false
+) {
+    fun toDomain() = PingTask(
+        id = id,
+        name = name,
+        target = target,
+        intervalSeconds = interval,
+        nodeIds = nodes,
+        autoJoin = auto_join
+    )
+
+    companion object {
+        fun fromDomain(task: PingTask) = PingTaskDto(
+            id = task.id,
+            name = task.name,
+            target = task.target,
+            interval = task.intervalSeconds,
+            nodes = task.nodeIds,
+            auto_join = task.autoJoin
+        )
+    }
+}
+
+@Serializable
+data class PingTasksDto(val tasks: List<PingTaskDto> = emptyList())
+
+@Serializable
+data class PingTaskSavedDto(val id: Long = 0)
+
+/** GET /api/nodes/{id}/metrics?series=ping。 */
+@Serializable
+data class PingPointDto(
+    val task_id: Long = 0,
+    val ts: Long = 0,
+    val latency: Long? = null,
+    val loss: Double = 0.0
+) {
+    fun toDomain() = PingPoint(
+        taskId = task_id,
+        timestampSeconds = ts,
+        latencyMs = latency,
+        lossPercent = loss
+    )
+}
+
+@Serializable
+data class PingHistoryDto(
+    val ping: List<PingPointDto> = emptyList(),
+    val probes: Map<String, String> = emptyMap(),
+    val loss: Map<String, Double> = emptyMap(),
+    val step: Long = 60
+) {
+    fun toDomain() = PingHistory(
+        taskNames = probes.mapNotNull { (id, name) -> id.toLongOrNull()?.let { it to name } }.toMap(),
+        points = ping.map { it.toDomain() },
+        totalLossPercent = loss.mapNotNull { (id, value) -> id.toLongOrNull()?.let { it to value } }.toMap(),
+        stepSeconds = step
     )
 }
 

@@ -3,6 +3,8 @@ package com.minprobe.app.domain.repository
 import com.minprobe.app.domain.model.AuthType
 import com.minprobe.app.domain.model.MetricsHistory
 import com.minprobe.app.domain.model.Node
+import com.minprobe.app.domain.model.PingHistory
+import com.minprobe.app.domain.model.PingTask
 import com.minprobe.app.domain.model.ServerInstance
 import kotlinx.coroutines.flow.Flow
 
@@ -59,4 +61,17 @@ interface NodeRepository {
         nodeId: Long,
         hours: Int
     ): MetricsHistory
+
+    suspend fun getPingHistory(
+        baseUrl: String,
+        sessionCookie: String?,
+        authType: AuthType,
+        nodeId: Long,
+        hours: Int
+    ): PingHistory
+
+    /** 以下接口需要管理员会话；访客模式仅能查看已公开的延迟历史。 */
+    suspend fun getPingTasks(baseUrl: String, sessionCookie: String?): List<PingTask>
+    suspend fun savePingTask(baseUrl: String, sessionCookie: String?, task: PingTask): Long
+    suspend fun deletePingTask(baseUrl: String, sessionCookie: String?, taskId: Long)
 }

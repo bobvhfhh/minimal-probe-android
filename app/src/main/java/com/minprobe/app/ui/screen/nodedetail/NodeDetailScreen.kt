@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -46,6 +48,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.minprobe.app.R
 import com.minprobe.app.domain.model.Node
+import com.minprobe.app.domain.model.PingPoint
 import com.minprobe.app.ui.screen.HandleEffects
 import com.minprobe.app.ui.screen.formatBytes
 import com.minprobe.app.ui.screen.formatExpiry
@@ -53,6 +56,10 @@ import com.minprobe.app.ui.screen.formatSpeed
 import com.minprobe.app.ui.screen.formatUptime
 import com.minprobe.app.ui.screen.server.ServerReLoginScreen
 import com.minprobe.app.ui.screen.showToast
+import com.minprobe.app.ui.screen.ping.PingHealth
+import com.minprobe.app.ui.screen.ping.formatPacketLoss
+import com.minprobe.app.ui.screen.ping.formatPingLatency
+import com.minprobe.app.ui.screen.ping.pingHealth
 import java.util.Locale
 import org.koin.core.parameter.parametersOf
 
@@ -353,8 +360,92 @@ private fun NodeDetailContent(
                 modifier = Modifier.padding(8.dp)
             )
         }
+
+        Text(
+            "TCP 延迟监控",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(horizontal = 4.dp, top = 6.dp)
+        )
+        when {
+            state.isPingLoading -> Box(Modifier.fillMaxWidth().height(92.dp)) {
+                CircularProgressIndicator(Modifier.size(24.dp).align(Alignment.Center))
+            }
+            state.pingError != null -> Text(
+                state.pingError!!,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(8.dp)
+            )
+            state.pingHistory != null && state.pingHistory!!.taskNames.isNotEmpty() ->
+                PingHistoryCard(state.pingHistory!!)
+            else -> Text(
+                "未配置 TCP 监控。请在节点列表右上角的延迟监控中添加任务。",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(8.dp)
+            )
+        }
         Spacer(Modifier.height(24.dp))
     }
+}
+
+@Composable
+private fun PingHistoryCard(history: com.minprobe.app.domain.model.PingHistory) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        shape = MaterialTheme.shapes.extraLarge,
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            history.taskNames.forEach { (taskId, name) ->
+                val samples = history.points.filter { it.taskId == taskId }.takeLast(24)
+                val latest = samples.lastOrNull()
+                val totalLoss = history.totalLossPercent[taskId] ?: 0.0
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text(name, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
+                    Text(
+                        formatPingLatency(latest?.latencyMs),
+                        color = pingHealth(latest?.latencyMs, totalLoss).toColor(),
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                    Spacer(Modifier.width(10.dp))
+                    Text(
+                        formatPacketLoss(totalLoss),
+                        color = pingHealth(latest?.latencyMs, totalLoss).toColor(),
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                }
+                PingSegments(samples)
+            }
+        }
+    }
+}
+
+@Composable
+private fun PingSegments(samples: List<PingPoint>) {
+    val latest = samples.takeLast(24)
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+        repeat(24) { index ->
+            val sample = latest.getOrNull(index)
+            val color = when (sample?.let { pingHealth(it.latencyMs, it.lossPercent) }) {
+                PingHealth.HEALTHY -> androidx.compose.ui.graphics.Color(0xFF35C878)
+                PingHealth.WARNING -> androidx.compose.ui.graphics.Color(0xFFF2B84B)
+                PingHealth.ERROR -> androidx.compose.ui.graphics.Color(0xFFE24B4B)
+                null -> MaterialTheme.colorScheme.surfaceVariant
+            }
+            androidx.compose.material3.Surface(
+                modifier = Modifier.weight(1f).height(8.dp),
+                shape = MaterialTheme.shapes.extraSmall,
+                color = color
+            ) {}
+        }
+    }
+}
+
+@Composable
+private fun PingHealth.toColor(): androidx.compose.ui.graphics.Color = when (this) {
+    PingHealth.HEALTHY -> androidx.compose.ui.graphics.Color(0xFF23B66F)
+    PingHealth.WARNING -> androidx.compose.ui.graphics.Color(0xFFE2A52C)
+    PingHealth.ERROR -> MaterialTheme.colorScheme.error
 }
 
 @Composable

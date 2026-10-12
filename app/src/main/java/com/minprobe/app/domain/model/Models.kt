@@ -118,3 +118,33 @@ data class MetricsHistory(
     val memTotal: Long = 0,
     val diskTotal: Long = 0
 )
+
+/** 一个由服务端下发到节点 Agent 的真实 TCP 连通性探测。 */
+data class PingTask(
+    val id: Long = 0,
+    val name: String,
+    /** host:port，IPv6 地址必须带方括号。 */
+    val target: String,
+    val intervalSeconds: Int,
+    val nodeIds: List<Long> = emptyList(),
+    val autoJoin: Boolean = false
+)
+
+/** 一个时间桶内的 TCP 探测结果；null 延迟表示该桶全部超时。 */
+data class PingPoint(
+    val taskId: Long,
+    val timestampSeconds: Long,
+    val latencyMs: Long?,
+    val lossPercent: Double = 0.0
+)
+
+data class PingHistory(
+    val taskNames: Map<Long, String> = emptyMap(),
+    val points: List<PingPoint> = emptyList(),
+    /** 服务端按完整查询窗口计算的准确丢包率。 */
+    val totalLossPercent: Map<Long, Double> = emptyMap(),
+    val stepSeconds: Long = 60
+) {
+    fun latestFor(taskId: Long): PingPoint? =
+        points.asReversed().firstOrNull { it.taskId == taskId }
+}

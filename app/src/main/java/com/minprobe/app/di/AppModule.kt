@@ -102,6 +102,7 @@ val appModule = module {
         com.minprobe.app.ui.screen.nodedetail.NodeDetailViewModel(nodeId, get(), get(), get())
     }
     factory { com.minprobe.app.ui.screen.nodelist.NodeListViewModel(get(), get(), get()) }
+    factory { com.minprobe.app.ui.screen.ping.PingMonitorViewModel(get(), get(), get()) }
     factory { com.minprobe.app.ui.screen.settings.SettingsViewModel(get(), get(), get()) }
     factory { com.minprobe.app.ui.screen.settings.AboutViewModel(get(), get()) }
     factory { com.minprobe.app.ui.screen.server.ServerReLoginViewModel(get(), get()) }

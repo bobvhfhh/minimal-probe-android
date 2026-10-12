@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.NetworkCheck
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -56,6 +57,7 @@ import com.minprobe.app.R
 import com.minprobe.app.domain.model.Node
 import com.minprobe.app.ui.screen.HandleEffects
 import com.minprobe.app.ui.screen.nodedetail.NodeDetailScreen
+import com.minprobe.app.ui.screen.ping.PingMonitorScreen
 import com.minprobe.app.ui.screen.server.ServerReLoginScreen
 import com.minprobe.app.ui.screen.showToast
 
@@ -121,7 +123,12 @@ class NodeListScreen : Screen {
                             Icon(Icons.Default.ArrowBack, contentDescription = null)
                         }
                     },
-                    actions = { SortMenu(state.sort) { viewModel.onEvent(NodeListContract.Event.SortSelected(it)) } }
+                    actions = {
+                        IconButton(onClick = { navigator.push(PingMonitorScreen()) }) {
+                            Icon(Icons.Default.NetworkCheck, contentDescription = "TCP 延迟监控")
+                        }
+                        SortMenu(state.sort) { viewModel.onEvent(NodeListContract.Event.SortSelected(it)) }
+                    }
                 )
             }
         ) { padding ->

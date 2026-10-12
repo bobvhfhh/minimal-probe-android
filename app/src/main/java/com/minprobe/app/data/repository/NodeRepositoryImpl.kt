@@ -5,6 +5,8 @@ import com.minprobe.app.data.remote.MonitorWebSocket
 import com.minprobe.app.domain.model.AuthType
 import com.minprobe.app.domain.model.MetricsHistory
 import com.minprobe.app.domain.model.Node
+import com.minprobe.app.domain.model.PingHistory
+import com.minprobe.app.domain.model.PingTask
 import com.minprobe.app.domain.repository.NodeRepository
 import kotlinx.coroutines.flow.Flow
 
@@ -38,4 +40,17 @@ class NodeRepositoryImpl(
         }.getOrNull()
         return nodeService.getMetricsHistory(baseUrl, sessionCookie, authType, nodeId, hours, node)
     }
+
+    override suspend fun getPingHistory(
+        baseUrl: String, sessionCookie: String?, authType: AuthType, nodeId: Long, hours: Int
+    ): PingHistory = nodeService.getPingHistory(baseUrl, sessionCookie, authType, nodeId, hours)
+
+    override suspend fun getPingTasks(baseUrl: String, sessionCookie: String?): List<PingTask> =
+        nodeService.getPingTasks(baseUrl, sessionCookie)
+
+    override suspend fun savePingTask(baseUrl: String, sessionCookie: String?, task: PingTask): Long =
+        nodeService.savePingTask(baseUrl, sessionCookie, task)
+
+    override suspend fun deletePingTask(baseUrl: String, sessionCookie: String?, taskId: Long) =
+        nodeService.deletePingTask(baseUrl, sessionCookie, taskId)
 }
